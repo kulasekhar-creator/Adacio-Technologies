@@ -1,0 +1,1156 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Adacio — Single-file Demo</title>
+
+  <!-- Chart.js (v4) + Zoom plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #071025;
+      --card: rgba(255, 255, 255, 0.03);
+      --muted: #9aa7b2;
+      --accent1: #60a5fa;
+      --accent2: #5eead4;
+      --glass-border: rgba(255, 255, 255, 0.06);
+      --success: #10b981;
+      --danger: #f97316;
+      --text: #e6eef6;
+      --font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(180deg, #050a15, #071025 70%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      font-family: var(--font-family)
+    }
+
+    /* Centered auth */
+    .auth-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      max-width: 1120px;
+      width: 100%
+    }
+
+    .auth-card {
+      max-width: 500px;
+      margin: 0 auto
+    }
+
+    h1 {
+      margin: 0 0 6px 0;
+      font-size: 20px
+    }
+
+    p.mute {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin-top: 10px
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(20, 30, 45, 0.9);
+      color: var(--text);
+      margin-top: 6px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent1));
+      color: #05202a;
+      border: 0;
+      cursor: pointer;
+      font-weight: 700
+    }
+
+    .link {
+      background: transparent;
+      border: 0;
+      color: var(--accent2);
+      cursor: pointer
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.06);
+      border-top-color: var(--accent2);
+      animation: spin 1s linear infinite;
+      margin: 10px auto
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* Dashboard layout */
+    .app {
+      display: flex;
+      gap: 18px;
+      padding: 22px;
+      align-items: flex-start
+    }
+
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #05202a;
+      font-weight: 800
+    }
+
+    .nav {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .nav button {
+      background: var(--card);
+      border: 1px solid var(--glass-border);
+      padding: 10px;
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: left;
+      cursor: pointer
+    }
+
+    .nav button.active {
+      background: linear-gradient(90deg, var(--accent2), var(--accent1));
+      color: #05202a;
+      font-weight: 700
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 12px
+    }
+
+    .kpi {
+      background: var(--card);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border)
+    }
+
+    .kpi .title {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .kpi .val {
+      font-weight: 700;
+      font-size: 20px;
+      margin-top: 6px
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      margin-top: 12px
+    }
+
+    .chart-card {
+      background: var(--card);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border)
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%
+    }
+
+    /* campaigns table */
+    .table-wrap {
+      margin-top: 12px;
+      background: var(--card);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      overflow: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: var(--text)
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      text-align: left
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02)
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    /* customers table */
+    .customers-wrap {
+      max-height: 420px;
+      overflow: auto;
+      margin-top: 8px
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      align-items: center
+    }
+
+    .row .left {
+      display: flex;
+      gap: 12px;
+      align-items: center
+    }
+
+    .pill {
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02)
+    }
+
+    .modal {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+      min-width: 320px;
+      z-index: 30
+    }
+
+    .overlay {
+      position: fixed;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 20
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .small {
+      font-size: 13px
+    }
+
+    .live-badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.02);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03)
+    }
+
+    .ai-box {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.005));
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03)
+    }
+
+    @media(max-width:980px) {
+      .app {
+        flex-direction: column;
+        padding: 10px
+      }
+
+      .sidebar {
+        width: 100%
+      }
+    }
+
+    .tiny {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .success {
+      color: var(--success);
+      font-weight: 700
+    }
+
+    .danger {
+      color: var(--danger);
+      font-weight: 700
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- AUTH -->
+  <div id="auth" class="auth-wrap" aria-hidden="false">
+    <div class="card auth-card" role="dialog" aria-modal="true">
+      <h1>Adacio</h1>
+      <p class="mute">Sign in to preview the live demo dashboard.</p>
+
+      <div id="auth-form">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="you@company.com" />
+        <label>Password</label>
+        <input id="pass" type="password" placeholder="password" />
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="loginBtn" class="btn">Login</button>
+          <button id="showSignup" class="link">Create account</button>
+        </div>
+      </div>
+
+      <div id="auth-loader" style="display:none;text-align:center">
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="small muted">Logging you in…</div>
+      </div>
+
+      <div id="auth-signup" style="display:none">
+        <label>Full name</label>
+        <input id="su-name" type="text" placeholder="Your name" />
+        <label>Email</label>
+        <input id="su-email" type="email" />
+        <label>Password</label>
+        <input id="su-pass" type="password" />
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="signupBtn" class="btn">Sign up</button>
+          <button id="backLogin" class="link">Back to login</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DASHBOARD (hidden until login) -->
+  <div id="dashboard" style="display:none">
+    <div class="app">
+      <aside class="sidebar">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="logo">AD</div>
+          <div>
+            <div style="font-weight:700">Adacio</div>
+            <div class="small muted">Ad performance studio</div>
+          </div>
+        </div>
+
+        <div class="nav" style="margin-top:16px">
+          <button class="active" data-tab="overview">Overview</button>
+          <button data-tab="campaigns">Campaigns</button>
+          <button data-tab="customers">Customers</button>
+          <button data-tab="alerts">Alerts</button>
+          <button data-tab="reports">Reports</button>
+          <button data-tab="settings">Settings</button>
+        </div>
+
+        <div style="margin-top:auto;font-size:13px" class="small muted">
+          Logged in as<br><strong id="ui-email">you@company.com</strong>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div>
+            <div style="font-weight:700;font-size:18px">Campaign — Diwali Promo</div>
+            <div class="small muted">Last updated: <span id="last-updated">—</span></div>
+          </div>
+          <div class="filters">
+            <select id="range">
+              <option value="7">Last 7 days</option>
+              <option value="14" selected>Last 14 days</option>
+              <option value="30">Last 30 days</option>
+            </select>
+            <button id="refresh" class="btn">Refresh</button>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div id="liveBadge" class="live-badge"><span id="liveDot"
+                  style="width:8px;height:8px;border-radius:999px;background:#34d399;display:inline-block"></span><span
+                  id="liveText">Live</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overview -->
+        <section id="overview" class="tab" style="display:block">
+          <div class="kpis">
+            <div class="kpi">
+              <div class="title">Total Conversions</div>
+              <div class="val" id="k-total">2,139</div>
+              <div class="small muted">tracked + inferred</div>
+            </div>
+            <div class="kpi">
+              <div class="title">Measured Conversions</div>
+              <div class="val" id="k-measured">1,497</div>
+              <div class="small muted">UTM / QR / Calls</div>
+            </div>
+            <div class="kpi">
+              <div class="title">Inferred TV Conversions</div>
+              <div class="val" id="k-inferred">642</div>
+              <div class="small muted">signal model</div>
+            </div>
+            <div class="kpi">
+              <div class="title">Model Confidence</div>
+              <div class="val" id="k-confidence">99.9%</div>
+              <div class="small muted">higher = stronger signals</div>
+            </div>
+          </div>
+
+          <div class="charts">
+            <!-- Left: Line chart -->
+            <div class="chart-card" style="height:360px;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div style="font-weight:700">Conversions Over Time</div>
+                <div class="tiny muted">Hover for metrics • Wheel zoom • Drag to pan</div>
+              </div>
+              <div style="flex:1;position:relative">
+                <canvas id="lineChart" width="800" height="320"
+                  style="width:100%;height:100%;border-radius:6px"></canvas>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:8px">
+                <div class="tiny muted">Total: <strong id="lineTotal">—</strong></div>
+                <div class="tiny muted">Top channel: <strong id="lineTop">—</strong></div>
+              </div>
+            </div>
+
+            <!-- Right: Pie + top channels -->
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="chart-card" style="height:220px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="font-weight:700">Platform Share</div>
+                  <div class="tiny muted">% of conversions</div>
+                </div>
+                <div style="position:relative;height:150px;margin-top:6px">
+                  <canvas id="pieChart" width="400" height="150"></canvas>
+                  <div id="pieLegend" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px"></div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="font-weight:700">Top Channels</div>
+                  <div class="tiny muted">Conversions</div>
+                </div>
+                <div id="topChannels" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="chart-card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>AI Advice</strong>
+                <div class="tiny muted">Smart suggestions (demo)</div>
+              </div>
+              <div><button id="applyAdvice" class="btn">Apply Recommendation</button></div>
+            </div>
+            <div id="aiAdvice" class="ai-box" style="margin-top:8px">—</div>
+          </div>
+        </section>
+
+        <!-- Campaigns -->
+        <section id="campaigns" class="tab" style="display:none">
+          <div class="table-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div><strong>Campaigns</strong>
+                <div class="small muted">Top 25 campaigns</div>
+              </div>
+              <div class="controls"><input id="campSearch" placeholder="Search campaign" /><button id="campExport"
+                  class="btn">Export CSV</button></div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Campaign</th>
+                  <th>Channel</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Spent (₹)</th>
+                  <th>Return (₹)</th>
+                  <th>ROI</th>
+                </tr>
+              </thead>
+              <tbody id="campaignsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Customers -->
+        <section id="customers" class="tab" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Customers</strong>
+              <div class="small muted">All converted customers (live)</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="custSearch" placeholder="Search name/IP/campaign" />
+              <select id="custFilter">
+                <option>All</option>
+                <option>Instagram</option>
+                <option>WhatsApp</option>
+                <option>Email</option>
+                <option>Calls</option>
+                <option>Direct</option>
+                <option>TV</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="customers-wrap" id="customersWrap" tabindex="0" style="margin-top:8px"></div>
+        </section>
+
+        <!-- Alerts -->
+        <section id="alerts" class="tab" style="display:none">
+          <div class="table-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div><strong>Alerts</strong>
+                <div class="small muted">Active alerts</div>
+              </div>
+              <div><button id="dismissAll" class="btn">Dismiss all</button></div>
+            </div>
+            <div id="alertsBody"></div>
+          </div>
+        </section>
+
+        <!-- Reports -->
+        <section id="reports" class="tab" style="display:none">
+          <div class="chart-card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>Reports</strong>
+                <div class="small muted">Download campaign reports</div>
+              </div>
+              <div><button id="reportGen" class="btn">Download CSV</button></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings -->
+        <section id="settings" class="tab" style="display:none">
+          <div class="chart-card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>Settings</strong>
+                <div class="small muted">Tracking & integrations</div>
+              </div>
+              <div></div>
+            </div>
+            <div style="margin-top:12px" class="small muted">This is a demo UI. Server-side toggles would be wired to
+              your backend.</div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- modal placeholders -->
+  <div id="overlay" class="overlay" style="display:none"></div>
+  <div id="modal" class="modal" style="display:none"></div>
+
+  <script>
+    /* =========================
+       Demo: realistic data + UI
+       ========================= */
+
+    const CHANNELS = ['Instagram', 'WhatsApp', 'Email', 'Calls', 'Direct', 'TV', 'YouTube', 'Facebook', 'LinkedIn', 'Billboard', 'Radio', 'Pamphlet', 'Spotify', 'Jio-Hotstar', 'Newspaper', 'Website'];
+    const COLORS = ['#60a5fa', '#34d399', '#f97316', '#a78bfa', '#94a3b8', '#f59e0b', '#3b82f6', '#1877f2', '#0ea5a4', '#efb810', '#fb7185', '#ff7ab6', '#8b5cf6', '#06b6d4', '#94a3b8', '#22c55e'];
+
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function fmt(n) { return n.toLocaleString('en-IN'); }
+    function nowLabel(offsetDays = 0) {
+      const d = new Date(); d.setDate(d.getDate() - offsetDays);
+      return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+    }
+
+    /* ---------------------------
+       Build demo time series
+       --------------------------- */
+    let series = [];
+    function initSeries(days) {
+      series = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const point = { date: nowLabel(i) };
+        // create a base volume and then channel-specific splits
+        const base = rand(200, 900);
+        CHANNELS.forEach((ch, idx) => {
+          // give weight: digital heavier, offline lighter
+          let weight = (['Instagram', 'WhatsApp', 'YouTube', 'Facebook', 'Website', 'Email', 'LinkedIn'].includes(ch)) ? (0.06 + Math.random() * 0.15) : (0.02 + Math.random() * 0.06);
+          // TV & Billboards spike occasionally
+          if (ch === 'TV' && Math.random() < 0.08) weight += 0.4 * Math.random();
+          point[ch] = Math.max(0, Math.round(base * weight));
+        });
+        series.push(point);
+      }
+    }
+    initSeries(30);
+
+    /* customers based on recent series */
+    let customers = [];
+    function genCustomersFromSeries(s) {
+      const out = [];
+      let id = 1000;
+      s.forEach(pt => {
+        const total = CHANNELS.reduce((acc, ch) => acc + (pt[ch] || 0), 0);
+        const hits = Math.max(1, Math.floor(total / 80));
+        for (let i = 0; i < hits; i++) {
+          const ch = CHANNELS[rand(0, CHANNELS.length - 1)];
+          out.push({
+            id: id++,
+            date: pt.date,
+            ip: `192.168.${rand(0, 255)}.${rand(1, 254)}`,
+            device: rand(0, 1) ? `iPhone ${rand(8, 14)}` : `Pixel ${rand(3, 6)}`,
+            os: rand(0, 1) ? `iOS ${rand(13, 16)}` : `Android ${rand(9, 12)}`,
+            city: ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata'][rand(0, 5)],
+            country: 'India',
+            campaign: `${ch} Campaign ${rand(1, 6)}`,
+            channel: ch,
+            value: rand(299, 4999)
+          });
+        }
+      });
+      return out;
+    }
+    customers = genCustomersFromSeries(series.slice(-14));
+
+    /* ---------------------------
+       Auth demo wiring
+       --------------------------- */
+    const authEl = document.getElementById('auth');
+    const dashEl = document.getElementById('dashboard');
+    const loginBtn = document.getElementById('loginBtn');
+    const showSignup = document.getElementById('showSignup');
+    const backLogin = document.getElementById('backLogin');
+    const signupBtn = document.getElementById('signupBtn');
+    const authForm = document.getElementById('auth-form');
+    const authSignup = document.getElementById('auth-signup');
+    const authLoader = document.getElementById('auth-loader');
+
+    showSignup && showSignup.addEventListener('click', () => { authForm.style.display = 'none'; authSignup.style.display = 'block'; });
+    backLogin && backLogin.addEventListener('click', () => { authSignup.style.display = 'none'; authForm.style.display = 'block'; });
+
+    function loginDemo(email) {
+      authForm.style.display = 'none'; authSignup.style.display = 'none'; authLoader.style.display = 'block';
+      setTimeout(() => {
+        authEl.style.display = 'none'; dashEl.style.display = 'block';
+        document.getElementById('ui-email').textContent = email || 'you@company.com';
+        renderAll();
+        startLive();
+      }, 1100);
+    }
+    loginBtn.addEventListener('click', () => loginDemo(document.getElementById('email').value || 'you@company.com'));
+    signupBtn && signupBtn.addEventListener('click', () => loginDemo(document.getElementById('su-email').value || 'you@company.com'));
+
+    /* ---------------------------
+       Tabs wiring
+       --------------------------- */
+    const tabButtons = Array.from(document.querySelectorAll('.nav button'));
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const t = btn.dataset.tab;
+        tabs.forEach(z => z.style.display = (z.id === t) ? 'block' : 'none');
+        if (t === 'customers') renderCustomers();
+      });
+    });
+
+    /* ============================
+       Chart.js: line + pie setup
+       ============================ */
+    const lineCtx = document.getElementById('lineChart');
+    const pieCtx = document.getElementById('pieChart');
+
+    let lineChart = null;
+    let pieChart = null;
+
+    function buildLineChart(daysWindow) {
+      const labels = series.slice(-daysWindow).map(s => s.date);
+      // We'll plot stacked lines for major channels: Instagram, WhatsApp, Website, TV, Email
+      const channelSet = ['Instagram', 'WhatsApp', 'Website', 'TV', 'Email', 'YouTube'];
+      const datasets = channelSet.map((ch, idx) => {
+        return {
+          label: ch,
+          data: series.slice(-daysWindow).map(s => s[ch] || 0),
+          borderColor: COLORS[CHANNELS.indexOf(ch)] || COLORS[idx],
+          backgroundColor: hexToRgba(COLORS[CHANNELS.indexOf(ch)] || COLORS[idx], 0.08),
+          tension: 0.25,
+          fill: false,
+          pointRadius: 2,
+          borderWidth: 2
+        };
+      });
+
+      if (lineChart) lineChart.destroy();
+      lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: 'rgba(230,238,243,0.9)' } },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`
+              }
+            },
+            zoom: {
+              pan: { enabled: true, mode: 'x', modifierKey: 'ctrl' },
+              zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+            }
+          },
+          scales: {
+            x: { ticks: { color: 'rgba(154,167,178,0.9)' } },
+            y: { ticks: { color: 'rgba(154,167,178,0.9)' } }
+          }
+        }
+      });
+
+      // update summary below
+      const totals = series.slice(-daysWindow).reduce((acc, s) => {
+        channelSet.forEach(ch => acc += (s[ch] || 0));
+        return acc;
+      }, 0);
+      document.getElementById('lineTotal').textContent = fmt(totals);
+      // top channel
+      const channelTotals = {};
+      CHANNELS.forEach(ch => channelTotals[ch] = series.slice(-daysWindow).reduce((a, b) => a + (b[ch] || 0), 0));
+      const top = Object.keys(channelTotals).sort((a, b) => channelTotals[b] - channelTotals[a])[0];
+      document.getElementById('lineTop').textContent = `${top} (${fmt(channelTotals[top])})`;
+    }
+
+    function buildPieChart(daysWindow) {
+      const totals = CHANNELS.map(ch => series.slice(-daysWindow).reduce((s, r) => s + (r[ch] || 0), 0));
+      const labels = CHANNELS.slice();
+      const data = totals;
+      if (pieChart) pieChart.destroy();
+      pieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: { labels, datasets: [{ data, backgroundColor: COLORS }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { color: 'rgba(230,238,243,0.9)' } },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.label}: ${Math.round(ctx.parsed * 100 / (data.reduce((a, b) => a + b, 0) || 1))}% • ${fmt(ctx.parsed)}`
+              }
+            }
+          }
+        }
+      });
+
+      // rebuild legend area manually (compact)
+      const legend = document.getElementById('pieLegend');
+      legend.innerHTML = '';
+      const sum = totals.reduce((a, b) => a + b, 0) || 1;
+      CHANNELS.forEach((ch, idx) => {
+        const percent = Math.round(totals[idx] * 100 / sum);
+        const node = document.createElement('div');
+        node.style.display = 'flex'; node.style.alignItems = 'center'; node.style.gap = '8px';
+        node.innerHTML = `<div style="width:10px;height:10px;background:${COLORS[idx]};border-radius:3px"></div><div class="tiny muted">${ch} • ${percent}%</div>`;
+        legend.appendChild(node);
+      });
+    }
+
+    /* helpers */
+    function hexToRgba(hex, alpha) {
+      if (!hex) return `rgba(255,255,255,${alpha})`;
+      const c = hex.replace('#', '');
+      const r = parseInt(c.substring(0, 2), 16);
+      const g = parseInt(c.substring(2, 4), 16);
+      const b = parseInt(c.substring(4, 6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    /* ---------------------------
+       Campaigns table
+       --------------------------- */
+    function renderCampaigns() {
+      const tbody = document.getElementById('campaignsBody');
+      tbody.innerHTML = '';
+      // make 25 realistic campaigns
+      for (let i = 0; i < 25; i++) {
+        const ch = CHANNELS[i % CHANNELS.length];
+        const startIdx = rand(1, 20);
+        const endIdx = startIdx + rand(3, 12);
+        const spent = rand(10000, 300000);
+        const conv = rand(30, 1500);
+        const revenue = Math.round(conv * rand(200, 2000));
+        const roi = Math.round((revenue - spent) / Math.max(1, spent) * 100);
+        const tr = document.createElement('tr');
+        const roiClass = (roi >= 20) ? 'success' : (roi >= 0 ? 'tiny' : 'danger');
+        tr.innerHTML = `<td>${ch} Campaign ${i + 1}</td>
+      <td>${ch}</td>
+      <td>${nowLabel(startIdx)}</td>
+      <td>${nowLabel(Math.min(30, endIdx))}</td>
+      <td>₹${fmt(spent)}</td>
+      <td style="font-weight:700;color:${roi >= 0 ? 'var(--success)' : 'var(--danger)'}">₹${fmt(revenue)}</td>
+      <td class="${roiClass}">${roi}%</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    /* ---------------------------
+       Alerts (demo)
+       --------------------------- */
+    let ALERTS = [
+      { id: 1, level: 'HIGH', title: 'TV spend high, conversions stagnant', note: 'Model suggests shift 20% budget to Instagram.' },
+      { id: 2, level: 'MED', title: 'Promo redemptions below target', note: 'Check UTM on pamphlet QR.' },
+      { id: 3, level: 'LOW', title: 'VoIP number returned error', note: 'Replace provisioning.' }
+    ];
+    function renderAlerts() {
+      const el = document.getElementById('alertsBody');
+      el.innerHTML = '';
+      ALERTS.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.innerHTML = `<div class="left"><div class="pill">${a.level}</div><div style="margin-left:6px"><strong>${a.title}</strong><div class="tiny muted">${a.note}</div></div></div>
+      <div><button class="btn small" onclick="takeAction(${a.id})">Take action</button></div>`;
+        el.appendChild(div);
+      });
+    }
+    function takeAction(id) {
+      alert('Action placeholder for alert id: ' + id);
+    }
+
+    /* ---------------------------
+       Customers list + modal
+       --------------------------- */
+    const custWrap = document.getElementById('customersWrap');
+    const custSearch = document.getElementById('custSearch');
+    const custFilter = document.getElementById('custFilter');
+
+    function renderCustomers() {
+      custWrap.innerHTML = '';
+      const q = (custSearch.value || '').toLowerCase();
+      const f = custFilter.value;
+      const filtered = customers.filter(c => {
+        if (f && f !== 'All' && c.channel !== f) return false;
+        if (!q) return true;
+        return (c.ip || '').includes(q) || (c.campaign || '').toLowerCase().includes(q) || (c.city || '').toLowerCase().includes(q);
+      });
+      filtered.slice().reverse().forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `<div class="left"><div style="width:8px;height:8px;background:${COLORS[CHANNELS.indexOf(c.channel)]};border-radius:4px"></div>
+      <div><strong>${c.campaign}</strong><div class="tiny muted">${c.city}, ${c.country} • ${c.date}</div></div></div>
+      <div style="display:flex;gap:12px;align-items:center"><div class="tiny muted">${c.ip}</div><div class="tiny muted">₹${fmt(c.value)}</div><button class="btn small" data-id="${c.id}">View</button></div>`;
+        custWrap.appendChild(row);
+      });
+      // attach click handlers
+      custWrap.querySelectorAll('button[data-id]').forEach(b => {
+        b.addEventListener('click', (ev) => {
+          const id = +ev.target.dataset.id;
+          const c = customers.find(x => x.id === id);
+          showCustomerModal(c);
+        });
+      });
+    }
+    custSearch && custSearch.addEventListener('input', renderCustomers);
+    custFilter && custFilter.addEventListener('change', renderCustomers);
+
+    function showCustomerModal(c) {
+      if (!c) return;
+      const overlay = document.getElementById('overlay');
+      const modal = document.getElementById('modal');
+      overlay.style.display = 'block'; modal.style.display = 'block';
+      overlay.onclick = closeModal;
+      modal.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><strong>Customer ${c.id}</strong><button class="link" id="closeModal">Close</button></div>
+    <div style="margin-top:10px" class="tiny muted">Converted: ${c.date}</div>
+    <div style="margin-top:12px"><strong>IP:</strong> ${c.ip}</div>
+    <div style="margin-top:6px"><strong>Device:</strong> ${c.device}</div>
+    <div style="margin-top:6px"><strong>OS:</strong> ${c.os}</div>
+    <div style="margin-top:6px"><strong>Location:</strong> ${c.city}, ${c.country}</div>
+    <div style="margin-top:6px"><strong>Campaign:</strong> ${c.campaign}</div>
+    <div style="margin-top:6px"><strong>Channel:</strong> ${c.channel}</div>
+    <div style="margin-top:6px"><strong>Value:</strong> ₹${fmt(c.value)}</div>`;
+      document.getElementById('closeModal').addEventListener('click', closeModal);
+    }
+    function closeModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('modal').style.display = 'none'; }
+
+    /* ---------------------------
+       AI Advice rotation & apply
+       --------------------------- */
+    const ADVICE_SET = [
+      { text: 'Reduce TV spend by 20% and boost Instagram carousel for mobile users.', conf: 99.9 },
+      { text: 'Run WhatsApp broadcast to past customers with coupon DIWALI20; expected uplift 12–18%.', conf: 96.2 },
+      { text: 'Add unique phone number per flyer batch for attribution — helps isolate pamphlet ROI.', conf: 94.5 },
+      { text: 'Increase bids for Android mobile users 15% between 6–9 PM; CTR historically higher.', conf: 92.1 },
+      { text: 'Pause underperforming newspaper creative and reallocate to YouTube skippable ads.', conf: 90.3 }
+    ];
+    let adviceIndex = 0;
+    function rotateAdvice() {
+      const a = ADVICE_SET[adviceIndex % ADVICE_SET.length];
+      document.getElementById('aiAdvice').textContent = a.text + ' (model confidence: ' + a.conf + '%)';
+      adviceIndex++;
+    }
+    document.getElementById('applyAdvice').addEventListener('click', () => alert('Applied recommendation (demo): ' + document.getElementById('aiAdvice').textContent));
+
+    /* ---------------------------
+       Live updates simulation
+       --------------------------- */
+    let liveInterval = null;
+    function startLive() {
+      if (liveInterval) clearInterval(liveInterval);
+      // update live badge pulsing + append small updates
+      const liveDot = document.getElementById('liveDot');
+      function pulse() { liveDot.style.transform = `scale(${1 + Math.random() * 0.35})`; }
+      liveInterval = setInterval(() => {
+        // small series push (rolling)
+        const newPt = { date: nowLabel(0) };
+        const base = rand(200, 1200);
+        CHANNELS.forEach(ch => {
+          let weight = (['Instagram', 'WhatsApp', 'YouTube', 'Facebook', 'Website'].includes(ch)) ? (0.06 + Math.random() * 0.15) : (0.02 + Math.random() * 0.07);
+          if (ch === 'TV' && Math.random() < 0.05) weight += 0.2 * Math.random();
+          newPt[ch] = Math.max(0, Math.round(base * weight));
+        });
+        series.push(newPt);
+        if (series.length > 120) series.shift();
+
+        // append customers for this tick
+        const total = CHANNELS.reduce((s, ch) => s + (newPt[ch] || 0), 0);
+        const hits = Math.max(1, Math.floor(total / 80));
+        for (let i = 0; i < hits; i++) {
+          const ch = CHANNELS[rand(0, CHANNELS.length - 1)];
+          customers.push({
+            id: (customers.length ? customers[customers.length - 1].id + 1 : 2000),
+            date: newPt.date,
+            ip: `10.0.${rand(0, 255)}.${rand(1, 254)}`,
+            device: rand(0, 1) ? `iPhone ${rand(8, 14)}` : `Galaxy ${rand(8, 22)}`,
+            os: rand(0, 1) ? `iOS ${rand(13, 16)}` : `Android ${rand(9, 13)}`,
+            city: ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata'][rand(0, 5)],
+            country: 'India',
+            campaign: `${ch} Campaign ${rand(1, 6)}`,
+            channel: ch,
+            value: rand(299, 4999)
+          });
+        }
+
+        // visual updates
+        const range = parseInt(document.getElementById('range').value);
+        buildLineChart(range);
+        buildPieChart(range);
+        renderTopChannels();
+        renderCustomers();
+        updateKPIs();
+        rotateAdvice();
+        pulse();
+
+        // occasionally push an alert
+        if (Math.random() < 0.12) {
+          ALERTS.unshift({ id: Date.now(), level: (Math.random() < 0.4 ? 'HIGH' : 'MED'), title: Math.random() < 0.5 ? 'Sponsored post underperforming' : 'Conversion drop detected', note: 'Auto flag — investigate creative/landing page.' });
+          if (ALERTS.length > 6) ALERTS.pop();
+          renderAlerts();
+        }
+      }, 3000);
+    }
+
+    /* ---------------------------
+       Top channels panel
+       --------------------------- */
+    function renderTopChannels() {
+      const container = document.getElementById('topChannels');
+      container.innerHTML = '';
+      const totals = CHANNELS.map(ch => ({ ch, val: series.slice(-30).reduce((s, row) => s + (row[ch] || 0), 0) }));
+      totals.sort((a, b) => b.val - a.val);
+      for (let i = 0; i < Math.min(6, totals.length); i++) {
+        const item = totals[i];
+        const pct = Math.round(item.val / Math.max(1, totals[0].val) * 100);
+        const node = document.createElement('div');
+        node.style.display = 'flex'; node.style.justifyContent = 'space-between'; node.style.alignItems = 'center';
+        node.innerHTML = `<div><strong>${item.ch}</strong><div class="tiny muted">${fmt(item.val)} conversions</div></div>
+      <div style="width:80px;height:8px;background:rgba(255,255,255,0.04);border-radius:6px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${COLORS[CHANNELS.indexOf(item.ch)]};"></div></div>`;
+        container.appendChild(node);
+      }
+    }
+
+    /* ---------------------------
+       KPIs
+       --------------------------- */
+    function updateKPIs() {
+      const lookback = 30;
+      const total = series.slice(-lookback).reduce((s, row) => s + CHANNELS.reduce((a, ch) => a + (row[ch] || 0), 0), 0);
+      const measured = Math.round(total * 0.72);
+      const inferred = total - measured;
+      const confidence = Math.max(40, Math.min(99.9, Math.round((measured / Math.max(1, total)) * 1000) / 10));
+      document.getElementById('k-total').textContent = fmt(total);
+      document.getElementById('k-measured').textContent = fmt(measured);
+      document.getElementById('k-inferred').textContent = fmt(inferred);
+      document.getElementById('k-confidence').textContent = confidence + '%';
+      document.getElementById('last-updated').textContent = new Date().toLocaleString();
+    }
+
+    /* ---------------------------
+       UI actions & helpers
+       --------------------------- */
+    document.getElementById('range').addEventListener('change', (e) => {
+      const r = parseInt(e.target.value);
+      buildLineChart(r);
+      buildPieChart(r);
+      renderTopChannels();
+    });
+    document.getElementById('refresh').addEventListener('click', () => { buildLineChart(parseInt(document.getElementById('range').value)); buildPieChart(parseInt(document.getElementById('range').value)); renderCampaigns(); renderCustomers(); renderAlerts(); updateKPIs(); });
+
+    document.getElementById('campExport').addEventListener('click', () => {
+      // CSV export demo for campaigns
+      const rows = [['Campaign', 'Channel', 'Start', 'End', 'Spent', 'Return', 'ROI']];
+      const tbody = document.getElementById('campaignsBody');
+      Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+        const cols = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
+        rows.push(cols);
+      });
+      const csv = rows.map(r => r.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'campaigns.csv'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('dismissAll').addEventListener('click', () => { ALERTS = []; renderAlerts(); alert('All alerts dismissed (demo)'); });
+    document.getElementById('reportGen').addEventListener('click', () => alert('Report CSV demo — use server-side generator or jsPDF for PDF export.'));
+    document.getElementById('applyAdvice').addEventListener('click', () => alert('Recommendation applied (demo)'));
+
+    document.getElementById('campSearch').addEventListener('input', function () {
+      const q = this.value.toLowerCase();
+      Array.from(document.querySelectorAll('#campaignsBody tr')).forEach(tr => {
+        tr.style.display = (tr.textContent.toLowerCase().includes(q)) ? '' : 'none';
+      });
+    });
+
+    /* ---------------------------
+       Initial render
+       --------------------------- */
+    function renderAll() {
+      const range = parseInt(document.getElementById('range').value);
+      buildLineChart(range);
+      buildPieChart(range);
+      renderTopChannels();
+      renderCampaigns();
+      renderAlerts();
+      updateKPIs();
+      renderCustomers();
+      rotateAdvice();
+    }
+
+    /* start live on small timeout only when dashboard visible */
+    window.addEventListener('load', () => {
+      renderAll();
+      // no auto start until login triggers startLive()
+    });
+
+    /* ensure responsiveness */
+    window.addEventListener('resize', () => {
+      if (lineChart) lineChart.resize();
+      if (pieChart) pieChart.resize();
+    });
+
+    /* expose takeAction for inline buttons */
+    window.takeAction = takeAction;
+
+  </script>
+</body>
+
+</html>

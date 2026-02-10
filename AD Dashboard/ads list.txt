@@ -1,0 +1,57 @@
+1. YouTube
+2. Instagram
+3. Facebook
+4. Telegram (if using bots or link tracking)
+5. TikTok
+6. Spotify (for ad campaigns)
+7. Jio Cinema / Disney+ Hotstar
+8. Google Ads
+9. Microsoft Ads
+10. Reddit Ads
+11. Quora Ads
+12. LinkedIn Ads
+13. Snapchat Ads
+14. Pinterest Ads
+15. X (Twitter) Ads
+16. Threads (Meta Ads Manager)
+17. Discord promotions (if done through sponsored servers or tracked links)
+18. Twitch Ads
+19. Netflix (ad metrics for brand lift & reach, but limited conversion data)
+20. Amazon Prime Video (DSP dashboard)
+21. MX Player
+22. Zee5
+23. SonyLIV
+24. Voot
+25. Amazon Ads
+26. Flipkart Ads
+27. Meesho Ads
+28. Myntra Ads
+29. Nykaa Ads
+30. Google AdMob
+31. InMobi
+32. Unity Ads
+33. IronSource
+34. AppLovin
+
+⚙️ Semi-Trackable Platforms (Partial or Indirect Data)
+
+
+35. WhatsApp (through Business API + link or catalog clicks)
+36. E-mail (open rates, click rates, conversions via landing pages)
+37. SMS (clicks through short URLs or coupon codes)
+38. Podcasts (via referral codes or landing pages)
+39. Audible (if integrated with Amazon Ads)
+40. Pocket FM (limited analytics, mostly impressions & reach)
+41. Gaana / Wynk / Apple Music (basic analytics via ad manager or agency tools)
+
+⚠️ Hard to Track or Offline-Only Platforms
+
+
+42. TV
+43. Billboards
+44. Hoardings
+45. Cinema ads (can use QR codes, but data is minimal)
+46. Programmatic DOOH (offers impression data, not user-level tracking)
+47. Mall / Airport Screens
+48. Metro Station Ads
+49. Elevator / Gym Digital Boards
